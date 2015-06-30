@@ -10,8 +10,10 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
 import auctionsniper.ui.MainWindow;
+import auctionsniper.ui.SniperStateDisplayer;
+import auctionsniper.xmpp.XMPPAuction;
 
-public class Main implements AuctionEventListener {
+public class Main {
 	@SuppressWarnings("unused") private Chat notToBeGCd;
 	
 	private static final int ARG_HOSTNAME = 0;
@@ -23,11 +25,6 @@ public class Main implements AuctionEventListener {
 	public static final String ITEM_ID_AS_LOGIN = "auction-%s";
 	public static final String AUCTION_ID_FORMAT =
 			ITEM_ID_AS_LOGIN + "@%s/" + AUCTION_RESOURCE;
-	
-	public static final String JOIN_COMMAND_FORMAT = 
-			"SOLVersion: 1.1; Command: JOIN;";
-	public static final String BID_COMMAND_FORMAT = 
-			"SOLVersion: 1.1; Command: BID; Price %d;";
 	
 	private MainWindow ui;
 	
@@ -47,13 +44,15 @@ public class Main implements AuctionEventListener {
 	{
 		disconnectWhenUICloses(connection);
 		
-		final Chat chat = connection.getChatManager().createChat(
-				auctionId(itemId, connection),
-				new AuctionMessageTranslator(this));
+		final Chat chat = 
+			connection.getChatManager().createChat(auctionId(itemId, connection), null);
+		this.notToBeGCd = chat;		
 
-		this.notToBeGCd = chat;
-		
-		chat.sendMessage(JOIN_COMMAND_FORMAT);
+		Auction auction = new XMPPAuction(chat);
+		chat.addMessageListener(
+				new AuctionMessageTranslator(
+						new AuctionSniper(auction, new SniperStateDisplayer(ui))));
+		auction.join();
 	}
 	
 	private void disconnectWhenUICloses(final XMPPConnection connection) {
@@ -81,14 +80,6 @@ public class Main implements AuctionEventListener {
 		SwingUtilities.invokeAndWait(new Runnable() {
 			public void run() {
 				ui = new MainWindow();
-			}
-		});
-	}
-	@Override
-	public void auctionClosed() {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				ui.showStatus(MainWindow.STATUS_LOST);
 			}
 		});
 	}

@@ -11,7 +11,8 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 
-import auctionsniper.Main;
+import auctionsniper.xmpp.XMPPAuction;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -60,13 +61,13 @@ public class FakeAuctionServer {
 		
 	public void hasReceivedJoinRequestFromSniper(String sniperId) 
 		throws InterruptedException {
-		receivesAMessageMatching(sniperId, equalTo(Main.JOIN_COMMAND_FORMAT));
+		receivesAMessageMatching(sniperId, equalTo(XMPPAuction.JOIN_COMMAND_FORMAT));
 	}
 	
 	public void hasReceivedBid(int bid, String sniperId) 
 		throws InterruptedException {
 		receivesAMessageMatching(sniperId,
-				equalTo(String.format(Main.BID_COMMAND_FORMAT, bid)));
+				equalTo(String.format(XMPPAuction.BID_COMMAND_FORMAT, bid)));
 	}
 	
 	private void receivesAMessageMatching(String sniperId,
@@ -77,7 +78,7 @@ public class FakeAuctionServer {
 	}
 	
 	public void announceClosed() throws XMPPException {
-		currentChat.sendMessage(new Message());
+		currentChat.sendMessage("SOLVersion: 1.1; Event: CLOSE;");
 	}
 	
 	public void stop() {
