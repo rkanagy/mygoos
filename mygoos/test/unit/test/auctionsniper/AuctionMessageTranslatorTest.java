@@ -11,16 +11,17 @@ import org.junit.runner.RunWith;
 import auctionsniper.AuctionEventListener;
 import auctionsniper.AuctionEventListener.PriceSource;
 import auctionsniper.AuctionMessageTranslator;
-import test.endtoend.auctionsniper.ApplicationRunner;
 
 @RunWith(JMock.class)
 public class AuctionMessageTranslatorTest {
+	private static final String SNIPER_ID = "sniper";
+
 	public static final Chat UNUSED_CHAT = null;
 	private final Mockery context = new Mockery();
 	private final AuctionEventListener listener =
 			context.mock(AuctionEventListener.class);
 	private final AuctionMessageTranslator translator =
-			new AuctionMessageTranslator(ApplicationRunner.SNIPER_ID, listener);
+			new AuctionMessageTranslator(SNIPER_ID, listener);
 	
 	@Test
 	public void notifiesAuctionClosedWhenCloseMessageReceived() {
@@ -55,7 +56,7 @@ public class AuctionMessageTranslatorTest {
 		Message message = new Message();
 		message.setBody(
 				"SOLVersion: 1.1; Event: PRICE; CurrentPrice: 234; Increment: 5; Bidder: "
-					+ ApplicationRunner.SNIPER_ID + ";");
+					+ SNIPER_ID + ";");
 		
 		translator.processMessage(UNUSED_CHAT, message);
 	}

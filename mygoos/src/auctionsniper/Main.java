@@ -10,7 +10,8 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
 import auctionsniper.ui.MainWindow;
-import auctionsniper.ui.SniperStateDisplayer;
+import auctionsniper.ui.SnipersTableModel;
+import auctionsniper.ui.SwingThreadSniperListener;
 import auctionsniper.xmpp.XMPPAuction;
 
 public class Main {
@@ -26,6 +27,7 @@ public class Main {
 	public static final String AUCTION_ID_FORMAT =
 			ITEM_ID_AS_LOGIN + "@%s/" + AUCTION_RESOURCE;
 	
+	private final SnipersTableModel snipers = new SnipersTableModel();
 	private MainWindow ui;
 	
 	public Main() throws Exception {
@@ -51,7 +53,7 @@ public class Main {
 		Auction auction = new XMPPAuction(chat);
 		chat.addMessageListener(
 				new AuctionMessageTranslator(connection.getUser(),
-						new AuctionSniper(auction, new SniperStateDisplayer(ui))));
+						new AuctionSniper(auction, new SwingThreadSniperListener(snipers), itemId)));
 		auction.join();
 	}
 	
@@ -79,7 +81,7 @@ public class Main {
 	private void startUserInterface() throws Exception {
 		SwingUtilities.invokeAndWait(new Runnable() {
 			public void run() {
-				ui = new MainWindow();
+				ui = new MainWindow(snipers);
 			}
 		});
 	}
